@@ -1,5 +1,6 @@
 from typing import Tuple
 from neural import *
+from sklearn.model_selection import train_test_split
 
 
 def parse_line(line: str) -> Tuple[List[float], List[float]]:
@@ -13,7 +14,7 @@ def parse_line(line: str) -> Tuple[List[float], List[float]]:
     """
     tokens = line.split(",")
     out = int(tokens[0])
-    output = [1 if out == 1 else 0.5 if out == 2 else 1]
+    output = [0 if out == 1 else 0.5 if out == 2 else 1]
 
     inpt = [float(x) for x in tokens[1:]]
     return (inpt, output)
@@ -48,10 +49,24 @@ def normalize(data: List[Tuple[List[float], List[float]]]):
 with open("wine_data.txt", "r") as f:
     training_data = [parse_line(line) for line in f.readlines() if len(line) > 4]
 
-td = normalize(training_data)
+train_data, test_data = train_test_split(training_data)
+
+# for line in train_data:
+#     print(line)
+
+# print(len(training_data))
+# print(len(train_data))
+# print(len(test_data))
+
+# td = normalize(training_data)
+train_data_norm = normalize(train_data)
+test_data_norm = normalize(test_data)
+
+# for line in test_data_norm:
+#     print(line)
 
 nn = NeuralNet(13, 3, 1)
-nn.train(td, iters=100_000, print_interval=1000, learning_rate=0.1)
+nn.train(train_data_norm, iters=10000, print_interval=1000, learning_rate=0.1)
 
-for i in nn.test_with_expected(td):
+for i in nn.test_with_expected(test_data_norm):
     print(f"desired: {i[1]}, actual: {i[2]}")
